@@ -43,6 +43,13 @@ public class GameManagerScript : MonoBehaviour
             //“®‚¯‚È‚¢ğŒ‚ğæ‚É‘‚­
             return false;
         }
+        //2‚ğ‰Ÿ‚·
+        if (map[moveTo] == 2) {
+        int velocity = moveTo - moveFrom;
+
+            bool sucess = MoveNumber(2, moveTo, moveTo + velocity);
+            if(!sucess) { return false; }
+        }
         map[moveTo] = number;
         map[moveFrom] = 0;
         return true;
@@ -51,7 +58,7 @@ public class GameManagerScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        map = new int[] { 0, 0, 0, 1, 0, 0, 0, 0, 0 };
+        map = new int[] { 0, 0, 0, 1, 2, 0, 0, 0, 0 };
         PrintArray();
     }
 
