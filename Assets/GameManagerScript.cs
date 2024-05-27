@@ -16,22 +16,16 @@ public class GameManagerScript : MonoBehaviour
     //配列の宣言
     int[,] map;
     GameObject[,] field;
+
     GameObject obj;
 
-
-    //出力処理
-    void PrintArray()
-    {
-
-
-    }
 
     //1が格納されているインデックスを取得する処理
     Vector2Int GetPlayerIndex()
     {
-        for (int y = 0; y < field.Length; y++)
+        for (int y = 0; y < field.GetLength(0); y++)
         {
-            for (int x = 0; x < field.Length; x++)
+            for (int x = 0; x < field.GetLength(1); x++)
             {
                 if (field[y, x] == null) { continue; }
                 if (field[y, x].tag == "Player")
@@ -45,29 +39,28 @@ public class GameManagerScript : MonoBehaviour
     }
 
     //移動の可不可を判断して移動させる処理
-    bool MoveNumber(string tag, Vector2Int moveFrom, Vector2Int moveTo)
+    bool MoveNumber(Vector2Int moveFrom, Vector2Int moveTo)
     {
-        //移動先が範囲外だったら移動不可
-        if (moveTo.y < 0 || moveTo.y >= field.GetLength(0)) { return false; }
-        if (moveTo.x < 0 || moveTo.x >= field.GetLength(1)) { return false; }
+        // 移動先が範囲外だったら移動不可
+        if (moveTo.y < 0 || moveTo.y >= map.GetLength(0)) { return false; }
+        if (moveTo.x < 0 || moveTo.x >= map.GetLength(1)) { return false; }
 
-        //移動先に2(箱)が居た時
+        // 移動先に箱がある場合
         if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "Box")
         {
             Vector2Int velocity = moveTo - moveFrom;
 
-            bool success = MoveNumber(tag, moveTo, moveTo + velocity);
-            if (!success) { return false; }
+            // 箱を移動する
+            bool success = MoveNumber(moveTo, moveTo + velocity);
+            if (!success) { return false; } // 移動が成功しない場合、移動不可
         }
 
-        //壁なら進まない
-        if (field[moveTo.y, moveTo.x] != null && field[moveTo.y, moveTo.x].tag == "Wall")
-        {
-            return false;
-        }
-
+        // プレイヤーの位置更新
         field[moveTo.y, moveTo.x] = field[moveFrom.y, moveFrom.x];
         field[moveFrom.y, moveFrom.x] = null;
+
+        // プレイヤーの座標更新
+        field[moveTo.y, moveTo.x].transform.position = new Vector3(moveTo.x, map.GetLength(0) - moveTo.y, 0);
 
         return true;
     }
@@ -79,7 +72,7 @@ public class GameManagerScript : MonoBehaviour
                             0);
     }
 
-    bool IsCleared()
+    bool IsCleared()//クリア条件
     {
         //Vector2Int型の可変長配列の作成
         List<Vector2Int> goals = new List<Vector2Int>();
@@ -112,7 +105,7 @@ public class GameManagerScript : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    void Start()
+    void Start()//初期化
     {
         map = new int[,] {
             {3,0,0,0,0 },
@@ -139,7 +132,15 @@ public class GameManagerScript : MonoBehaviour
                 {
                     field[y, x] = Instantiate(
                         playerPrefab,
-                        IndexToPosition(new Vector2Int(x, y)),
+                        new Vector3(x, map.GetLength(0) - y, 0),
+                        Quaternion.identity
+                        );
+                }
+                if (map[y, x] == 2)
+                {
+                    field[y, x] = Instantiate(
+                        boxPrefab,
+                        new Vector3(x, map.GetLength(0) - y, 0),
                         Quaternion.identity
                         );
                 }
@@ -164,7 +165,7 @@ public class GameManagerScript : MonoBehaviour
 
 
     //Update is called once per frame
-    void Update()
+    void Update()//メインループ
     {
         //右側に数字を移動させる処理
         if (Input.GetKeyDown(KeyCode.RightArrow))
@@ -172,7 +173,7 @@ public class GameManagerScript : MonoBehaviour
             //移動処理
             Vector2Int playerIndex = GetPlayerIndex();
             //移動処理を関数化
-            MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(1, 0));
+            MoveNumber(playerIndex, playerIndex + new Vector2Int(1, 0));
             //PrintArray();
         }
 
@@ -182,7 +183,7 @@ public class GameManagerScript : MonoBehaviour
             //移動処理
             Vector2Int playerIndex = GetPlayerIndex();
             //移動処理を関数化
-            MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(-1, 0));
+            MoveNumber(playerIndex, playerIndex + new Vector2Int(-1, 0));
             //PrintArray();
         }
 
@@ -192,7 +193,7 @@ public class GameManagerScript : MonoBehaviour
             //移動処理
             Vector2Int playerIndex = GetPlayerIndex();
             //移動処理を関数化
-            MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(0, -1));
+            MoveNumber(playerIndex, playerIndex + new Vector2Int(0, -1));
             //PrintArray();
         }
 
@@ -202,7 +203,7 @@ public class GameManagerScript : MonoBehaviour
             //移動処理
             Vector2Int playerIndex = GetPlayerIndex();
             //移動処理を関数化
-            MoveNumber("Player", playerIndex, playerIndex + new Vector2Int(0, 1));
+            MoveNumber(playerIndex, playerIndex + new Vector2Int(0, 1));
             //PrintArray();
         }
 
