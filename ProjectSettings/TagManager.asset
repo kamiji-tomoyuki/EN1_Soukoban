@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - Box
+  - BoxGoalPosition
+  - Wall
   layers:
   - Default
   - TransparentFX
